@@ -49,4 +49,8 @@ class Welcome extends CI_Controller {
 		$this->load->library('Template');
 		$this->template->layout('rute2/peta',$data);
 	}
+	public function save_map(){
+		$data = $this->input->post();
+		echo json_encode($data);
+	}
 }

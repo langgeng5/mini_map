@@ -14,6 +14,7 @@ let canvas_height = 500;
 let circle_rad = 20;
 var point_list = [];
 var path_list = [];
+
 let action_status = '';
 let mouse_click = 0;
 let path_width = 30;
@@ -294,5 +295,24 @@ function handleImage(e){
     reader.readAsDataURL(e.target.files[0]);     
 }
 
+
 init()
 animate()
+
+$('#undo').click(function(){
+    $.ajax({
+        type:"POST",
+        cache:false,
+        url:"<?= site_url('welcome/save_map') ?>",
+        data:{
+            'point': point_list,
+            'path': path_list,
+            'img' : bg_canvas.toDataURL(),
+        },
+        dataType: "json",
+        success: function (res) {
+
+          console.log(res);
+        }
+    });
+})
