@@ -12,26 +12,66 @@ var ctx = canvas.getContext('2d');
 let canvas_width = 500;
 let canvas_height = 500;
 let circle_rad = 20;
+let path_width = 30;
+let path_color = 'grey';
 var point_list = [];
 var path_list = [];
 
 let action_status = '';
-let mouse_click = 0;
-let path_width = 30;
-let path_color = 'grey';
 
-let point_hover = 0;
-let point_selected = 0;
+var background = new Image();
+background.src = "<?= base_url('assets/maps/ini_nama.PNG') ?>";
 
-let start_point = 0;
-let end_point = 0;
 
-// canvas.addEventListener('click', make_point);
-canvas.addEventListener('mousedown', start_click);
-canvas.addEventListener('mouseup', end_click);
-canvas.addEventListener('mousemove', hover_point);
-canvas.addEventListener('mousemove', movepoint);
-canvas.addEventListener('mousemove', check_for_points);
+background.onload = function(){
+    canvas_width = background.width;
+    canvas_height = background.height;
+    
+    
+    init()
+    c_bg.drawImage(background,0,0,canvas_width, canvas_height);  
+    animate()
+
+    
+    
+}
+
+$(document).ready(function(){
+    $.ajax({
+        type:"POST",
+        url:"<?= site_url('welcome/load_map') ?>",
+        dataType: "json",
+        data: {
+            a: 'asd'
+        },
+        success: function (res) {
+            var a = JSON.parse(res.point);
+            var b = JSON.parse(res.path);
+            
+            $.each(a, function(index,val){
+                point_list.push(new Point(val.x, val.y, val.r, val.color));
+            })
+
+            $.each(b, function(index,val){
+                let xx = 0;
+                let p = [];
+                $.each(point_list, function(j){
+                    
+                    if ((point_list[j].x == val.point1.x && point_list[j].y == val.point1.y) || (point_list[j].x == val.point2.x && point_list[j].y == val.point2.y)) {
+                        p[xx] = point_list[j];
+                        xx++;
+                    }
+                    // if (xx == 2) {
+                    //     break;
+                    // }
+                })
+                path_list.push(new Path(p[0], p[1]));
+            })
+        }
+    });
+})
+
+
 
 function Point(x,y,r,color){
     this.x = x;
@@ -139,94 +179,6 @@ function animate(){
     })
 }
 
-function getMousePos(event){
-    var rect = canvas.getBoundingClientRect()
-
-    return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-    }
-}
-
-function distance(x1,y1,x2,y2){
-    const xDist = x2-x1;
-    const yDist = y2-y1;
-
-    return Math.sqrt(Math.pow(xDist,2) + Math.pow(yDist, 2));
-}
-
-function clear_path_log(){
-    start_point = 0;
-    end_point = 0;
-}
-
-function removePath(value){
-    let j = 0;
-    while (j < path_list.length) {
-        if(path_list[j].point1 == value || path_list[j].point2 == value){
-            path_list.splice(j,1);
-            j--;
-        }
-        j++;
-    }
-}
-function removePoint(value) { 
-    for (let i = 0; i < point_list.length; i++) {
-        if(point_list[i] == value){
-            point_list.splice(i,1);
-            removePath(value);
-            break;
-        }
-    }
-
-    
-}
-
-function start_click(event){
-    mouse_click = 1;
-    point_selected = point_hover;
-    
-    if(action_status == 'create'){
-        if(point_hover == 0){
-            mousePos = getMousePos(event);
-            start_point = make_point(event);
-        }else{
-            start_point = point_hover;
-        }
-    }else if(action_status == 'remove'){
-        removePoint(point_hover);
-    }
-    
-}
-
-function end_click(event){
-
-    mouse_click = 0;
-    point_selected = 0;
-
-    if(action_status == 'create'){
-        if(point_hover == 0){
-            mousePos = getMousePos(event);
-            end_point = make_point(event);
-        }else{
-            end_point = point_hover;
-        }
-
-        if(start_point != 0 && end_point != 0){
-            path_list.push(new Path(start_point, end_point));
-        }
-    }
-    clear_path_log()
-}
-
-function movepoint(event){
-    if(mouse_click == 1 && action_status=='move'){
-        if (point_selected != 0) {
-            point_selected.move(event);   
-        }
-    }
-}
-
 function check_for_points(event){
     point_hover = 0;
 
@@ -238,92 +190,12 @@ function check_for_points(event){
     }  
 }
 
-function hover_point(event){
-    point_list.forEach(point => {
-        point.hover(event);
-    });   
-}
-
-function make_point(event){
-    mousePos = getMousePos(event);
-    var temp = new Point(mousePos.x,mousePos.y,circle_rad,'red')
-    point_list.push(temp);
-
-    return temp;
-}
-
-function make_path(event){
-    mousePos = getMousePos(event);
-
-    circle(c_point,mousePos.x,mousePos.y,circle_rad,'red');
-}
-
 function rectangle(c, x, y, dx, dy, color){
     c.strokeStyle = color;
     c.strokeRect(x, y, dx, dy);
 }
 
-function circle(c,x,y,r,color){
-    c.beginPath();
-    c.arc(x,y,r,0, Math.PI*2, false);
-    c.fillStyle = color;
-    c.fill();
-}
-
-function clear_canvas(){
-    ctx.clearRect(0, 0, canvas_width, canvas_height);
-    rectangle(ctx, 0, 0, canvas_width, canvas_height, 'black');
-}
-
 // background layers
-var imageLoader = document.getElementById('imageLoader');
-imageLoader.addEventListener('change', handleImage, false);
-
-function handleImage(e){
-    var reader = new FileReader();
-    reader.onload = function(event){
-        var img = new Image();
-        img.onload = function(){
-            canvas_width = img.width;
-            canvas_height = img.height;
-
-            init()
-            c_bg.drawImage(img,0,0);
-        }
-        img.src = event.target.result;
-    }
-    reader.readAsDataURL(e.target.files[0]);     
-}
 
 
-init()
-animate()
 
-$('#save').click(function(){
-    var data = new FormData();
-    var files = $('#imageLoader')[0].files;
-    if (files.length > 0) {
-        data.append('bg_file', files[0]);
-        data.append('point', JSON.stringify(point_list));
-        data.append('path', JSON.stringify(path_list));
-    }
-    // data.forEach(itu => {
-    //     console.log(itu);
-    // })
-    $.ajax({
-        type:"POST",
-        cache:false,
-        url:"<?= site_url('welcome/save_map') ?>",
-        processData: false,
-        contentType: false,
-        dataType: "json",
-        data: data,
-        success: function (res) {
-            if (res.status == 'success') {
-                console.log('yey');
-            }else{
-                console.log('beeh');
-            }
-        }
-    });
-})

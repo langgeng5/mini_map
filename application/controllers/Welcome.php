@@ -89,9 +89,17 @@ class Welcome extends CI_Controller {
 	}
 	
 	public function map_view(){
+		$json = read_file('./assets/data_maps/ini_nama.json');
+		$data  = json_decode($json);
+
+		// echo '<pre>' . print_r($data) . '</pre>';
+
 		$this->template->layout('rute2/view_map');
 	}
 	public function load_map(){
+		$json = read_file('./assets/data_maps/ini_nama.json');
+		$data  = json_decode($json);
 
+		echo $json;
 	}
 }
