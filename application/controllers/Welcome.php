@@ -51,6 +51,47 @@ class Welcome extends CI_Controller {
 	}
 	public function save_map(){
 		$data = $this->input->post();
-		echo json_encode($data);
+		$file_name = 'ini_nama';
+
+		$config['upload_path'] = './assets/maps/';
+		$config['allowed_types'] = 'gif|jpg|png';
+		$config['max_size'] = 1024 * 8;
+		$config['file_name'] = $file_name;
+		$config['overwrite'] = TRUE;
+
+		$this->load->library('upload', $config);
+
+		if ( ! $this->upload->do_upload('bg_file'))
+		{
+			$res = array('status' => 'error');
+		}
+		else
+		{
+			
+			$res = array('status' => 'success');
+
+			$json_data = array(
+				'point' => $data['point'],
+				'path' => $data['path'],
+			);
+
+			if ( ! write_file('./assets/data_maps/'.$file_name.'.json', json_encode($json_data)))
+			{
+				$res['json_file'] = 'error';
+			}
+			else
+			{
+				$res['json_file'] = 'success';
+			}
+			
+		}
+		echo json_encode($res);
+	}
+	
+	public function map_view(){
+		$this->template->layout('rute2/view_map');
+	}
+	public function load_map(){
+
 	}
 }
