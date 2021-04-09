@@ -14,6 +14,9 @@
 <hr>
 <div class="row">
     <div class="col-md-2">
+        <button id = "find-me">Show my location</button><br/>
+        <p id = "status"></p>
+        <a id = "map-link" target="_blank"></a>
     </div>
     <div class="col-md-4">
         <div id="kanvas">

@@ -17,6 +17,12 @@ let path_color = 'grey';
 var point_list = [];
 var path_list = [];
 
+let map_width = 20;
+let map_height = 10;
+
+let map_0 = {x: 115.196742,y: -8.637430}
+const to_meter = 100000;
+
 let action_status = '';
 
 var background = new Image();
@@ -56,14 +62,10 @@ $(document).ready(function(){
                 let xx = 0;
                 let p = [];
                 $.each(point_list, function(j){
-                    
                     if ((point_list[j].x == val.point1.x && point_list[j].y == val.point1.y) || (point_list[j].x == val.point2.x && point_list[j].y == val.point2.y)) {
                         p[xx] = point_list[j];
                         xx++;
                     }
-                    // if (xx == 2) {
-                    //     break;
-                    // }
                 })
                 path_list.push(new Path(p[0], p[1]));
             })
@@ -163,7 +165,7 @@ function init(){
     canvas.height = canvas_height;
 
     rectangle(ctx, 0, 0, canvas_width, canvas_height, 'black');
-    
+    get_location()
 }
 function animate(){
     requestAnimationFrame(animate);
@@ -195,7 +197,57 @@ function rectangle(c, x, y, dx, dy, color){
     c.strokeRect(x, y, dx, dy);
 }
 
-// background layers
+function draw_circle(x,y){
+    pos_0 = {
+        x: Math.abs(map_0.x) * to_meter,
+        y: Math.abs(map_0.y) * to_meter
+    }
+    let pos_now = {
+        x: (Math.abs(x) * to_meter) - pos_0.x,
+        y: (Math.abs(y) * to_meter) - pos_0.y
+    }
+
+    x_ini = Math.floor(canvas_width/map_width*pos_now.x);
+    y_ini = Math.floor(canvas_height/map_height*pos_now.y);
+    console.log(canvas_width+' - '+canvas_height);
+    console.log(x_ini+' - '+y_ini);
+
+    ctx.beginPath();
+    ctx.arc(x_ini,y_ini,circle_rad,0, Math.PI*2, false);
+    ctx.strokeStyle = 'red';
+    ctx.fillStyle = 'blue';
+    ctx.stroke();
+    ctx.fill()
+}
 
 
+function get_location(){
+    const status = document.querySelector('#status');
 
+    var options = {
+        enableHighAccuracy: true,
+    };
+
+    function success(position) {
+        const latitude  = position.coords.latitude;
+        const longitude = position.coords.longitude;
+    
+        status.textContent = latitude+" , "+longitude;
+        // console.log("lat: "+latitude+"; long: "+longitude)
+        ctx.clearRect(0,0,canvas_width,canvas_height);
+        draw_circle(longitude,latitude);
+    }
+    
+    function error() {
+        status.textContent = 'Unable to retrieve your location';
+    }
+
+    if(!navigator.geolocation) {
+        status.textContent = 'Geolocation is not supported by your browser';
+    } else {
+        status.textContent = 'Locating…';
+        navigator.geolocation.getCurrentPosition(success, error, options);
+    }
+
+    setTimeout(get_location, 2000)
+}
