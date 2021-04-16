@@ -61,13 +61,10 @@ class Welcome extends CI_Controller {
 
 		$this->load->library('upload', $config);
 
-		if ( ! $this->upload->do_upload('bg_file'))
-		{
+		if ( ! $this->upload->do_upload('bg_file')){
 			$res = array('status' => 'error');
 		}
-		else
-		{
-			
+		else{			
 			$res = array('status' => 'success');
 
 			$json_data = array(
@@ -75,12 +72,9 @@ class Welcome extends CI_Controller {
 				'path' => $data['path'],
 			);
 
-			if ( ! write_file('./assets/data_maps/'.$file_name.'.json', json_encode($json_data)))
-			{
+			if ( ! write_file('./assets/data_maps/'.$file_name.'.json', json_encode($json_data))){
 				$res['json_file'] = 'error';
-			}
-			else
-			{
+			}else{
 				$res['json_file'] = 'success';
 			}
 			
@@ -91,7 +85,6 @@ class Welcome extends CI_Controller {
 	public function map_view(){
 		$json = read_file('./assets/data_maps/ini_nama.json');
 		$data  = json_decode($json);
-
 		// echo '<pre>' . print_r($data) . '</pre>';
 
 		$this->template->layout('rute2/view_map');
@@ -101,5 +94,46 @@ class Welcome extends CI_Controller {
 		$data  = json_decode($json);
 
 		echo $json;
+	}
+
+	function dist($point1, $point2){
+		
+		$x = ($point1['x'] - $point2['x']);
+		$y = ($point1['y'] - $point2['y']);
+
+		$distance = sqrt(pow($x,2) + pow($y,2));
+
+		return $distance;
+	}
+
+	public function find_route(){
+		// $lokasi = $this->input->post('lokasi');
+		// $tujuan = $this->input->post('tujuan');
+		// $map_name = $this->input->post('map_name');
+
+		$map_name = 'ini_nama';
+
+		$lokasi['x'] = 698;
+		$lokasi['y'] = 271;
+
+		$tujuan['x'] = 405.6875;
+		$tujuan['y'] = 455;
+
+		$json = read_file('./assets/data_maps/'.$map_name.'.json');
+		$data_map = json_decode($json);
+
+		$temp_key = 0;
+		$temp_dist = '';
+		$points = json_decode($data_map->point);
+
+		for ($i=0; $i < count($points); $i++) { 
+			$current_dist = $this->dist($lokasi, (array)$points[$i]);
+			if ($current_dist < $temp_dist || $temp_dist == '') {
+				$temp_dist = $current_dist;
+				$temp_key = $i;
+			}
+		}
+		
+		
 	}
 }

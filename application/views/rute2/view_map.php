@@ -17,6 +17,8 @@
         <button id = "find-me">Show my location</button><br/>
         <p id = "status"></p>
         <a id = "map-link" target="_blank"></a>
+        <br>
+        <button class="btn btn-success" id="find_now">cari tujuan</button>
     </div>
     <div class="col-md-4">
         <div id="kanvas">

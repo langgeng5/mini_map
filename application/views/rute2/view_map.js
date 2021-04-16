@@ -16,6 +16,9 @@ let path_width = 30;
 let path_color = 'grey';
 var point_list = [];
 var path_list = [];
+let current_pos = {x: 0, y:0};
+let destination = {x: 0, y:0};
+let map_name = 'ini_nama';
 
 let map_width = 20;
 let map_height = 10;
@@ -28,6 +31,7 @@ let action_status = '';
 var background = new Image();
 background.src = "<?= base_url('assets/maps/ini_nama.PNG') ?>";
 
+canvas.addEventListener('mousemove', check_for_points);
 
 background.onload = function(){
     canvas_width = background.width;
@@ -37,9 +41,6 @@ background.onload = function(){
     init()
     c_bg.drawImage(background,0,0,canvas_width, canvas_height);  
     animate()
-
-    
-    
 }
 
 $(document).ready(function(){
@@ -71,8 +72,40 @@ $(document).ready(function(){
             })
         }
     });
+
 })
 
+$('#find_now').click(function(){
+    $.ajax({
+        type:"POST",
+        url:"<?= site_url('welcome/find_route') ?>",
+        dataType: "json",
+        data: {
+            lokasi: current_pos,
+            tujuan: destination,
+            map_name: map_name
+        },
+        success: function (res) {
+            console.log(res);
+        }
+    });
+})
+
+
+function getMousePos(event){
+    var rect = canvas.getBoundingClientRect()
+
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    }
+}
+function distance(x1,y1,x2,y2){
+    const xDist = x2-x1;
+    const yDist = y2-y1;
+
+    return Math.sqrt(Math.pow(xDist,2) + Math.pow(yDist, 2));
+}
 
 
 function Point(x,y,r,color){
@@ -187,6 +220,7 @@ function check_for_points(event){
     for(var i = 0; i < point_list.length; i++){
         if(point_list[i].check(event)){
             point_hover = point_list[i];
+            console.log(point_hover);
             break;
         }
     }  
@@ -209,8 +243,10 @@ function draw_circle(x,y){
 
     x_ini = Math.floor(canvas_width/map_width*pos_now.x);
     y_ini = Math.floor(canvas_height/map_height*pos_now.y);
-    console.log(canvas_width+' - '+canvas_height);
-    console.log(x_ini+' - '+y_ini);
+    // console.log(canvas_width+' - '+canvas_height);
+    // console.log(x_ini+' - '+y_ini);
+    current_pos = {x: x_ini, y: y_ini};
+    current_pos = {x: x_ini, y: y_ini};
 
     ctx.beginPath();
     ctx.arc(x_ini,y_ini,circle_rad,0, Math.PI*2, false);
