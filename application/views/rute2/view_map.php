@@ -1,7 +1,8 @@
 <style>
     canvas { position: absolute; }
-    #ui_layer { z-index: 4; }
-    #point_layer { z-index: 3; }
+    #ui_layer { z-index: 5; }
+    #point_layer { z-index: 4; }
+    #route_layer { z-index: 3; }
     #path_layer { z-index: 2; }
     #background_layer { z-index: 1; }
 
@@ -24,6 +25,7 @@
         <div id="kanvas">
             <canvas id="background_layer"></canvas>
             <canvas id="path_layer"></canvas>
+            <canvas id="route_layer"></canvas>
             <canvas id="point_layer"></canvas>
             <canvas id="ui_layer"></canvas>
         </div>

@@ -119,14 +119,20 @@ class Welcome extends CI_Controller {
 		$tujuan['x'] = 405.6875;
 		$tujuan['y'] = 455;
 
+		$route = [];
+		$neighbor = [];
+		$curent_pos;
+
 		$json = read_file('./assets/data_maps/'.$map_name.'.json');
 		$data_map = json_decode($json);
 
 		$temp_key = 0;
 		$temp_dist = '';
 		$points = json_decode($data_map->point);
+		$paths = json_decode($data_map->path);
 
 		for ($i=0; $i < count($points); $i++) { 
+			$points[$i]->pos = $i;
 			$current_dist = $this->dist($lokasi, (array)$points[$i]);
 			if ($current_dist < $temp_dist || $temp_dist == '') {
 				$temp_dist = $current_dist;
@@ -134,6 +140,44 @@ class Welcome extends CI_Controller {
 			}
 		}
 		
+		$curent_pos = $temp_key;
+		// print_r($curent_pos);
+		while(!($points[$curent_pos]->x == $tujuan['x'] && $points[$curent_pos]->y == $tujuan['y'])){
+
+			foreach ($paths as $key => $value) {
+				$temp_neighbor = '';
+	
+				if ($value->point1->x == $points[$curent_pos]->x && $value->point1->y == $points[$curent_pos]->y) {
+					$temp_neighbor = $value->point2;
+				}elseif ($value->point2->x == $points[$curent_pos]->x && $value->point2->y == $points[$curent_pos]->y) {
+					$temp_neighbor = $value->point1;
+				}
+	
+				if ($temp_neighbor != '') {
+					foreach ($points as $point) {
+						if ($point->x == $temp_neighbor->x && $point->y == $temp_neighbor->y && !isset($point->before)) {
+							$point->before = $curent_pos;
+							$point->dist = $this->dist((array)$point, $tujuan);
+							array_push($neighbor, $point);
+						}
+					}
+				}
+			}
+	
+			$temp_sel = '';
+			foreach ($neighbor as $ng) {
+				if (($temp_sel == '' || $ng->dist < $temp_sel->dist) && !isset($ng->disabled)) {
+					$ng->disabled = true;
+					$temp_sel = $ng;
+				}
+			}
+	
+			$curent_pos = $temp_sel->pos;
+
+			print_r($points[$curent_pos]);
+			echo "<br><br>";
+			
+		}
 		
 	}
 }

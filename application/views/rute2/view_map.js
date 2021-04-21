@@ -1,10 +1,12 @@
 var bg_canvas = document.querySelector('#background_layer');
 var path_canvas = document.querySelector('#path_layer');
+var route_canvas = document.querySelector('#route_layer');
 var point_canvas = document.querySelector('#point_layer');
 var canvas = document.querySelector('#ui_layer');
 
 var c_bg = bg_canvas.getContext('2d');
 var c_path = path_canvas.getContext('2d');
+var c_route = route_canvas.getContext('2d');
 var c_point = point_canvas.getContext('2d');
 var ctx = canvas.getContext('2d');
 
